@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Radar</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+            height: 100vh;
+        }
+        canvas {
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="radarCanvas" width="600" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById("radarCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radarRadius = 250;
+        let angle = 0;
+
+        // Objects will be dynamically added from sensor input
+        let objects = []; 
+
+        // Function to draw grid
+        function drawGrid() {
+            ctx.strokeStyle = "green";
+            ctx.lineWidth = 0.5;
+            const step = 25;
+            for (let x = 0; x <= canvas.width; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= canvas.height; y += step) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        // Function to draw radar
+        function drawRadar() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawGrid();
+
+            // Draw radar circle
+            ctx.strokeStyle = "green";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radarRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Draw objects
+            objects.forEach(obj => {
+                const intensity = Math.max(0, obj.intensity - 0.01);
+                ctx.fillStyle = `rgba(0, 255, 0, ${intensity})`;
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                obj.intensity = intensity; // Fade effect
+            });
+
+            // Draw radar sweep
+            ctx.strokeStyle = "rgba(0, 255, 0, 0.7)";
+            ctx.beginPath();
+            const sweepX = centerX + Math.cos(angle) * radarRadius;
+            const sweepY = centerY + Math.sin(angle) * radarRadius;
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(sweepX, sweepY);
+            ctx.stroke();
+
+            // Simulate detecting objects
+            if (Math.random() < 0.02) {
+                const distance = Math.random() * radarRadius;
+                const theta = angle + Math.random() * 0.1 - 0.05; // Slight angle randomness
+                objects.push({
+                    x: centerX + Math.cos(theta) * distance,
+                    y: centerY + Math.sin(theta) * distance,
+                    intensity: 1
+                });
+            }
+
+            // Update angle
+            angle += 0.05;
+            if (angle > Math.PI * 2) angle -= Math.PI * 2;
+
+            requestAnimationFrame(drawRadar);
+        }
+
+        drawRadar();
+    </script>
+</body>
+</html>

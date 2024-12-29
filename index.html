@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Simulation</title>
+    <style>
+        canvas {
+            display: block;
+            margin: auto;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="radarCanvas" width="600" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById("radarCanvas");
+        const ctx = canvas.getContext("2d");
+        const radarRadius = 250;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const numObjects = 10;
+        let angle = 0;
+
+        // Generate random objects
+        const objects = Array.from({ length: numObjects }, () => {
+            const distance = Math.random() * radarRadius;
+            const theta = Math.random() * 2 * Math.PI;
+            return {
+                x: centerX + Math.cos(theta) * distance,
+                y: centerY + Math.sin(theta) * distance,
+            };
+        });
+
+        function drawRadar() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw radar circle
+            ctx.strokeStyle = "green";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radarRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Draw objects
+            objects.forEach(obj => {
+                ctx.fillStyle = "green";
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw radar sweep
+            ctx.strokeStyle = "green";
+            const sweepX = centerX + Math.cos(angle) * radarRadius;
+            const sweepY = centerY + Math.sin(angle) * radarRadius;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(sweepX, sweepY);
+            ctx.stroke();
+
+            // Update angle
+            angle += 0.02;
+            if (angle > Math.PI * 2) {
+                angle -= Math.PI * 2;
+            }
+
+            requestAnimationFrame(drawRadar);
+        }
+
+        drawRadar();
+    </script>
+</body>
+</html>
